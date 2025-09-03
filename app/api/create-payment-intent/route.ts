@@ -7,7 +7,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { amount, currency = "usd", orderData } = await request.json()
+    const { amount, currency = "usd", orderData, referralId } = await request.json()
 
     // Create payment intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -22,6 +22,7 @@ export async function POST(request: NextRequest) {
         customerName: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
         itemCount: orderData.items.length.toString(),
         totalAmount: orderData.total.toString(),
+        ...(referralId && { promotekit_referral: referralId }),
         items: JSON.stringify(
           orderData.items.map((item: any) => ({
             id: item.id,

@@ -85,6 +85,7 @@ export async function POST(request: NextRequest) {
           subscriptionId: fullSession.subscription as string || null,
           paymentStatus: fullSession.payment_status,
           mode: fullSession.mode,
+          referralId: fullSession.metadata?.promotekit_referral || null,
         },
         cryptoPaymentDetails: null, // null for Stripe orders
         specialInstructions: "",

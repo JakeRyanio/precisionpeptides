@@ -1,6 +1,13 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+
+// TypeScript declaration for PromoteKit global variable
+declare global {
+  interface Window {
+    promotekit_referral?: string;
+  }
+}
 import { useRouter } from "next/navigation"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js"
@@ -70,12 +77,38 @@ function CheckoutForm() {
   const [isStripeReady, setIsStripeReady] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<"card" | "crypto">("card")
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false)
+  const [referralId, setReferralId] = useState<string | null>(null)
 
   useEffect(() => {
     if (stripe && elements) {
       setIsStripeReady(true)
     }
   }, [stripe, elements])
+
+  // Capture PromoteKit referral ID
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Check for referral ID in URL parameters first
+      const urlParams = new URLSearchParams(window.location.search)
+      const urlReferral = urlParams.get('ref') || urlParams.get('referral')
+      
+      if (urlReferral) {
+        setReferralId(urlReferral)
+      } else {
+        // Check for PromoteKit referral ID
+        const checkPromoteKit = () => {
+          if (window.promotekit_referral) {
+            setReferralId(window.promotekit_referral)
+          }
+        }
+        
+        // Check immediately and after a delay for script to load
+        checkPromoteKit()
+        const timer = setTimeout(checkPromoteKit, 1000)
+        return () => clearTimeout(timer)
+      }
+    }
+  }, [])
 
   const handleInputChange = (field: keyof CheckoutFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -116,6 +149,7 @@ function CheckoutForm() {
         body: JSON.stringify({
           amount: Math.round(total * 100),
           currency: "usd",
+          referralId,
           orderData: {
             items,
             customerInfo: formData,
@@ -528,6 +562,7 @@ function CheckoutForm() {
                 formData={formData}
                 total={total}
                 onSuccess={handleCryptoSuccess}
+                referralId={referralId}
               />
             )}
           </form>

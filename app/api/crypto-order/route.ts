@@ -20,6 +20,7 @@ export async function POST(request: NextRequest) {
       transactionId,
       walletAddress,
       timestamp,
+      referralId,
     } = orderData
 
     // Generate order ID
@@ -63,6 +64,7 @@ export async function POST(request: NextRequest) {
         transactionId,
         walletAddress,
         status: "pending_verification",
+        referralId: referralId || null,
       },
       stripePaymentDetails: null, // null for crypto orders
       specialInstructions: customerInfo.specialInstructions || '',

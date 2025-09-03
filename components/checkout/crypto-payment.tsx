@@ -27,6 +27,7 @@ interface CryptoPaymentProps {
   formData: CheckoutFormData
   total: number
   onSuccess: () => void
+  referralId?: string | null
 }
 
 interface CryptoWallet {
@@ -67,7 +68,7 @@ const CRYPTO_WALLETS: CryptoWallet[] = [
   },
 ]
 
-export function CryptoPayment({ formData, total, onSuccess }: CryptoPaymentProps) {
+export function CryptoPayment({ formData, total, onSuccess, referralId }: CryptoPaymentProps) {
   const { items, clearCart } = useCart()
   const [selectedCrypto, setSelectedCrypto] = useState<string>("")
   const [transactionId, setTransactionId] = useState("")
@@ -121,6 +122,7 @@ export function CryptoPayment({ formData, total, onSuccess }: CryptoPaymentProps
             transactionId: transactionId.trim(),
             walletAddress: selectedWallet?.address,
             timestamp: new Date().toISOString(),
+            referralId,
           },
         }),
       })

@@ -8,7 +8,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { orderData } = await request.json()
+    const { orderData, referralId } = await request.json()
 
     // Create line items from cart
     const lineItems = createLineItemsFromCart(orderData.items)
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
         orderId: `order_${Date.now()}`,
         customerName: `${orderData.customerInfo.firstName} ${orderData.customerInfo.lastName}`,
         hasSubscriptions: hasSubscriptions.toString(),
+        ...(referralId && { promotekit_referral: referralId }),
       },
       shipping_address_collection: {
         allowed_countries: ["US", "CA", "GB", "AU"],

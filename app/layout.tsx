@@ -32,6 +32,12 @@ export default function RootLayout({
           </div>
           <Toaster />
         </CartProvider>
+        {/* PromoteKit Affiliate Tracking Script */}
+        <script 
+          async 
+          src="https://cdn.promotekit.com/promotekit.js" 
+          data-promotekit="4731abc5-b68c-4eda-9722-00ba5c401bbc"
+        ></script>
       </body>
     </html>
   )
