@@ -1,4 +1,11 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Research Peptides FAQ | Common Questions About Lab-Tested Peptides",
+  description: "Get answers to frequently asked questions about research peptides, purity testing, storage, reconstitution, and ordering. Expert guidance for peptide research applications.",
+  keywords: "peptide FAQ, research peptides questions, peptide storage, peptide reconstitution, lab tested peptides, peptide purity, research peptide ordering"
+}
 
 export default function FAQPage() {
   const faqs = [
@@ -56,11 +63,30 @@ export default function FAQPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* FAQ Schema Markup */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqs.map(faq => ({
+              "@type": "Question",
+              "name": faq.question,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": faq.answer
+              }
+            }))
+          })
+        }}
+      />
+      
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
+          <h1 className="text-4xl font-bold mb-4">Research Peptides FAQ</h1>
           <p className="text-xl text-gray-400">
-            Find answers to common questions about our research peptides and services
+            Expert answers to common questions about lab-tested research peptides and scientific applications
           </p>
         </div>
 

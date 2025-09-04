@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://precisionpeptides.store/sitemap.xml
+
+# Disallow admin and API routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /checkout/success
+Disallow: /cart-test
+Disallow: /checkout-test
+Disallow: /crypto-test
+Disallow: /env-test
+Disallow: /demo-success
+Disallow: /checkout-simple
+
+# Allow important pages
+Allow: /
+Allow: /shop
+Allow: /products/
+Allow: /contact
+Allow: /faq
+Allow: /explore
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1

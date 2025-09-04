@@ -104,3 +104,4 @@ Your webhook is configured to listen for:
 - **Stripe Webhooks**: https://dashboard.stripe.com/webhooks
 
 Your Stripe webhook integration is ready! Once you add the secret to Vercel and redeploy, all Stripe orders will automatically flow to your Zapier webhook.
+

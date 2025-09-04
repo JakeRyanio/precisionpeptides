@@ -49,10 +49,11 @@ export default function ShopPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 bg-[#201c1a] min-h-screen">
+      
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-serif font-medium mb-4 text-[#ebe7e4]">Research Peptides</h1>
-        <p className="text-xl text-[#beb2a4] font-light">Premium quality peptides for advanced scientific research</p>
+        <h1 className="text-4xl font-serif font-medium mb-4 text-[#ebe7e4]">Shop Premium Research Peptides Online</h1>
+        <p className="text-xl text-[#beb2a4] font-light">99.9% pure, lab-tested peptides for advanced scientific research. Fast USA shipping with COA included.</p>
       </div>
 
       {/* Filters */}

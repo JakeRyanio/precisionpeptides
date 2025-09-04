@@ -162,3 +162,4 @@ Order ID	Order Date	Payment Method	Order Total	First Name	Last Name	Email	Phone	
 ```
 
 Your Google Sheet is now ready to receive all order data from your website!
+

@@ -14,6 +14,14 @@ export interface Product {
     count: number
     featured: string
   }
+  // SEO-focused fields
+  purity: number // Purity percentage for SEO
+  storage: string // Storage requirements
+  description: string // SEO-optimized description
+  molecularWeight?: string // For scientific SEO
+  casNumber?: string // Chemical identifier for SEO
+  sequence?: string // Peptide sequence for scientific searches
+  researchApplications: string[] // Specific research use cases
 }
 
 export const categories = [
@@ -483,7 +491,7 @@ export const products: Product[] = [
     category: "Recovery / Immunity",
     price: 49.97,
     subscriptionPrice: getSubscriptionPrice(49.97, "bpc-157-5mg"), // $44.97
-    image: "/images/precision-peptides-vial.png",
+    image: "/images/bpc-157.png",
     overview:
       "BPC-157 is a synthetic peptide derived from a protective protein in gastric juice. It's known for healing injuries in muscles, tendons, and the digestive tract. Potential Benefits: Accelerates muscle, tendon, and ligament healing, Promotes gut repair (e.g., ulcers, IBS), Reduces inflammation, Supports neuroprotection. PubMed: https://pubmed.ncbi.nlm.nih.gov/?term=bpc-157",
     benefits: [
@@ -495,6 +503,20 @@ export const products: Product[] = [
     useCases: ["Initial injury research", "Basic tissue studies", "Entry-level protocols"],
     disclaimer: "For research use only. Not for human consumption.",
     reviews: { rating: 4.7, count: 198, featured: "Great entry point for tissue repair research. Reliable quality." },
+    // SEO-enhanced fields
+    purity: 99.9,
+    storage: "Store at -20°C, protect from light",
+    description: "BPC-157 research peptide (Body Protection Compound) is a synthetic pentadecapeptide derived from gastric juice proteins. This 99.9% pure, lab-tested peptide is extensively studied for tissue repair, wound healing, and gastrointestinal protection in research applications. Each 5mg vial is lyophilized and includes COA for research verification.",
+    molecularWeight: "1419.55 g/mol",
+    sequence: "Gly-Glu-Pro-Pro-Pro-Gly-Lys-Pro-Ala-Asp-Asp-Ala-Gly-Leu-Val",
+    researchApplications: [
+      "Tissue repair and regeneration studies",
+      "Wound healing research protocols",
+      "Gastrointestinal protection studies",
+      "Anti-inflammatory pathway research",
+      "Tendon and ligament repair studies",
+      "Neuroprotection research applications"
+    ]
   },
   {
     id: "bpc-157-10mg",

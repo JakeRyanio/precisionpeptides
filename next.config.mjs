@@ -7,14 +7,17 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
-    domains: ['localhost'],
+    unoptimized: false, // Enable image optimization for better SEO
+    domains: ['localhost', 'precisionpeptides.store'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
     ],
+    formats: ['image/webp', 'image/avif'], // Modern formats for better performance
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   // Enable static exports for some hosting platforms
   output: 'standalone',
@@ -25,7 +28,7 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  // Headers for security
+  // Headers for security and SEO
   async headers() {
     return [
       {
@@ -42,6 +45,20 @@ const nextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'origin-when-cross-origin',
+          },
+          {
+            key: 'X-Robots-Tag',
+            value: 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+          },
+        ],
+      },
+      // Cache static assets for better performance
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },

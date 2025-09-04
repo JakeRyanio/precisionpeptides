@@ -138,3 +138,4 @@ In your Zapier Zap:
 - Zapier free plan allows 100 tasks/month (upgrade if needed)
 
 Your integration is ready! Deploy to Vercel and set up the Stripe webhook to start receiving ALL orders in your Zapier workflow.
+
