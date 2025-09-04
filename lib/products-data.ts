@@ -14,14 +14,14 @@ export interface Product {
     count: number
     featured: string
   }
-  // SEO-focused fields
-  purity: number // Purity percentage for SEO
-  storage: string // Storage requirements
-  description: string // SEO-optimized description
+  // SEO-focused fields (optional for backward compatibility)
+  purity?: number // Purity percentage for SEO
+  storage?: string // Storage requirements
+  description?: string // SEO-optimized description
   molecularWeight?: string // For scientific SEO
   casNumber?: string // Chemical identifier for SEO
   sequence?: string // Peptide sequence for scientific searches
-  researchApplications: string[] // Specific research use cases
+  researchApplications?: string[] // Specific research use cases
 }
 
 export const categories = [

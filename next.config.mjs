@@ -9,21 +9,20 @@ const nextConfig = {
   images: {
     unoptimized: false, // Enable image optimization for better SEO
     domains: ['localhost', 'precisionpeptides.store'],
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
     formats: ['image/webp', 'image/avif'], // Modern formats for better performance
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+    minimumCacheTTL: 31536000, // Cache images for 1 year
   },
   // Enable static exports for some hosting platforms
   output: 'standalone',
   // Optimize for production
   compress: true,
   poweredByHeader: false,
+  swcMinify: true, // Use SWC for faster minification
+  experimental: {
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-accordion', '@radix-ui/react-tabs'],
+  },
   // Environment variables
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
