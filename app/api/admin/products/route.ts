@@ -33,25 +33,35 @@ async function syncProductToShipStation(product: {
   sku: string
   name: string
   price: number
-}): Promise<{ status: string; productId?: number }> {
+}): Promise<{ status: string; productId?: number; error?: string }> {
   try {
+    console.log(`[ShipStation] Starting sync for SKU: ${product.sku}`)
+    
     // Check if product exists
     const searchRes = await shipstationRequest(`/products?sku=${encodeURIComponent(product.sku)}`)
     if (!searchRes) {
-      return { status: 'not_configured' }
+      console.log('[ShipStation] API not configured - missing credentials')
+      return { status: 'not_configured', error: 'Missing SHIPSTATION_API_KEY or SHIPSTATION_API_SECRET' }
     }
 
+    const searchStatus = searchRes.status
+    const searchText = await searchRes.text()
+    console.log(`[ShipStation] Search response status: ${searchStatus}`)
+    
     if (searchRes.ok) {
-      const data = await searchRes.json()
+      const data = JSON.parse(searchText)
       const existing = data.products?.find((p: { sku: string }) => p.sku === product.sku)
       
       if (existing) {
         console.log(`[ShipStation] Product exists: ${product.sku} (ID: ${existing.productId})`)
         return { status: 'exists', productId: existing.productId }
       }
+    } else {
+      console.error(`[ShipStation] Search failed: ${searchStatus} - ${searchText}`)
     }
 
     // Create product in ShipStation
+    console.log(`[ShipStation] Creating product: ${product.sku}`)
     const createRes = await shipstationRequest('/products', 'POST', {
       sku: product.sku,
       name: product.name,
@@ -63,17 +73,26 @@ async function syncProductToShipStation(product: {
       fulfillmentSku: product.sku,
     })
 
-    if (createRes && createRes.ok) {
-      const created = await createRes.json()
+    if (!createRes) {
+      return { status: 'not_configured', error: 'API request failed' }
+    }
+
+    const createStatus = createRes.status
+    const createText = await createRes.text()
+    console.log(`[ShipStation] Create response status: ${createStatus}`)
+    console.log(`[ShipStation] Create response body: ${createText}`)
+
+    if (createRes.ok) {
+      const created = JSON.parse(createText)
       console.log(`[ShipStation] Created product: ${product.sku} (ID: ${created.productId})`)
       return { status: 'created', productId: created.productId }
     }
 
-    console.error('[ShipStation] Failed to create product')
-    return { status: 'failed' }
+    console.error(`[ShipStation] Failed to create product: ${createStatus} - ${createText}`)
+    return { status: 'failed', error: `${createStatus}: ${createText}` }
   } catch (error) {
     console.error('[ShipStation] Sync error:', error)
-    return { status: 'error' }
+    return { status: 'error', error: String(error) }
   }
 }
 
