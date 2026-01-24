@@ -217,42 +217,65 @@ export async function GET(request: NextRequest) {
   }
   
   try {
-    const startDate = parseShipStationDate(decodeURIComponent(startDateStr))
-    const endDate = parseShipStationDate(decodeURIComponent(endDateStr))
+    let startDate: Date
+    let endDate: Date
+    
+    try {
+      startDate = parseShipStationDate(decodeURIComponent(startDateStr))
+      endDate = parseShipStationDate(decodeURIComponent(endDateStr))
+    } catch (dateError) {
+      console.error('[ShipStation] Date parsing error:', dateError)
+      return new NextResponse(`Date parsing error: ${dateError}`, { status: 400 })
+    }
     
     const PAGE_SIZE = 100
     const offset = (page - 1) * PAGE_SIZE
     
     // Query orders modified between start and end date
-    const [orders, totalCount] = await Promise.all([
-      prisma.order.findMany({
-        where: {
-          updatedAt: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
-        include: {
-          items: true,
-        },
-        orderBy: { updatedAt: 'asc' },
-        skip: offset,
-        take: PAGE_SIZE,
-      }),
-      prisma.order.count({
-        where: {
-          updatedAt: {
-            gte: startDate,
-            lte: endDate,
-          },
-        },
-      }),
-    ])
+    let orders: OrderWithItems[]
+    let totalCount: number
     
-    const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
-    const xml = generateOrdersXML(orders as OrderWithItems[], totalPages)
+    try {
+      const results = await Promise.all([
+        prisma.order.findMany({
+          where: {
+            updatedAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+          include: {
+            items: true,
+          },
+          orderBy: { updatedAt: 'asc' },
+          skip: offset,
+          take: PAGE_SIZE,
+        }),
+        prisma.order.count({
+          where: {
+            updatedAt: {
+              gte: startDate,
+              lte: endDate,
+            },
+          },
+        }),
+      ])
+      orders = results[0] as OrderWithItems[]
+      totalCount = results[1]
+    } catch (dbError) {
+      console.error('[ShipStation] Database error:', dbError)
+      return new NextResponse(`Database error: ${dbError instanceof Error ? dbError.message : String(dbError)}`, { status: 500 })
+    }
     
-    console.log(`[ShipStation] Exported ${orders.length} orders (page ${page}/${totalPages})`)
+    let xml: string
+    try {
+      const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE))
+      xml = generateOrdersXML(orders, totalPages)
+      console.log(`[ShipStation] Exported ${orders.length} orders (page ${page}/${totalPages})`)
+    } catch (xmlError) {
+      console.error('[ShipStation] XML generation error:', xmlError)
+      return new NextResponse(`XML generation error: ${xmlError instanceof Error ? xmlError.message : String(xmlError)}`, { status: 500 })
+    }
     
     return new NextResponse(xml, {
       status: 200,
@@ -260,7 +283,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error('[ShipStation] Export error:', error)
-    return new NextResponse('Internal server error', { status: 500 })
+    return new NextResponse(`Internal server error: ${error instanceof Error ? error.message : String(error)}`, { status: 500 })
   }
 }
 
