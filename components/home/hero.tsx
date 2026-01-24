@@ -43,13 +43,23 @@ export function Hero() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 items-start">
               <Link href="/shop">
                 <Button className="bg-gradient-to-r from-[#d2c6b8] to-[#c4b8a4] hover:from-[#beb2a4] hover:to-[#b2a698] text-[#201c1a] font-medium px-8 py-6 text-lg hover:scale-105 transition-all duration-300 shadow-lg">
                   Explore Products
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
+              
+              <div className="flex flex-col items-center sm:items-start">
+                <span className="text-sm text-[#a09a94] mb-2">Buying in Bulk?</span>
+                <Link href="/wholesale/apply">
+                  <Button variant="outline" className="border-[#d2c6b8]/50 text-[#d2c6b8] hover:bg-[#d2c6b8]/10 hover:border-[#d2c6b8] font-medium px-8 py-6 text-lg hover:scale-105 transition-all duration-300">
+                    Wholesale Partner
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
 

@@ -1,20 +1,42 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Search } from "lucide-react"
+import { Search, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ProductCard } from "@/components/products/product-card"
-import { products, categories } from "@/lib/products-data"
+import type { Product } from "@/lib/products-data"
 
 export default function ShopPage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("All")
   const [sortBy, setSortBy] = useState("name")
 
+  // Get unique categories from products
+  const categories = ["All", ...Array.from(new Set(products.map(p => p.category))).sort()]
+
   useEffect(() => {
-    // Only access search params on client side after hydration
-    if (typeof window !== 'undefined') {
+    async function fetchProducts() {
+      try {
+        const res = await fetch("/api/products")
+        if (res.ok) {
+          const data = await res.json()
+          setProducts(data)
+        }
+      } catch (error) {
+        console.error("Failed to fetch products:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [])
+
+  useEffect(() => {
+    // Handle category from URL params
+    if (typeof window !== 'undefined' && products.length > 0) {
       const urlParams = new URLSearchParams(window.location.search)
       const categoryParam = urlParams.get("category")
       if (categoryParam) {
@@ -24,7 +46,7 @@ export default function ShopPage() {
         }
       }
     }
-  }, [])
+  }, [products, categories])
 
   const filteredProducts = products
     .filter((product) => {
@@ -46,6 +68,17 @@ export default function ShopPage() {
           return a.name.localeCompare(b.name)
       }
     })
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 bg-[#201c1a] min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-[#d2c6b8] mx-auto mb-4" />
+          <p className="text-[#beb2a4]">Loading products...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 bg-[#201c1a] min-h-screen">

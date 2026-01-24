@@ -331,7 +331,7 @@ function CheckoutForm() {
                   </div>
                   <div>
                     <label className="block text-sm font-medium mb-2 text-[#ebe7e4]">Country *</label>
-                    <Select value={formData.country} onValueChange={(value) => handleInputChange("country", value)}>
+                    <Select value={formData.country} onValueChange={(value: string) => handleInputChange("country", value)}>
                       <SelectTrigger className="elegant-input">
                         <SelectValue />
                       </SelectTrigger>

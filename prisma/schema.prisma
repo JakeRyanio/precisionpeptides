@@ -1,0 +1,190 @@
+// Prisma Schema for Precision Peptides Admin & Wholesale Portal
+// Using Supabase (PostgreSQL) with connection pooling
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  ADMIN
+  WHOLESALER
+  CUSTOMER
+}
+
+enum WholesaleStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String?
+  name          String?
+  role          UserRole  @default(CUSTOMER)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  wholesaleAccount WholesaleAccount?
+  orders          Order[]
+  
+  @@map("users")
+}
+
+model WholesaleAccount {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  companyName   String
+  taxId         String?
+  status        WholesaleStatus @default(PENDING)
+  discountPercent Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customPricing ProductWholesalePricing[]
+  orders        Order[]
+  
+  @@map("wholesale_accounts")
+}
+
+model Product {
+  id                String   @id @default(cuid())
+  name              String
+  category          String
+  price             Float
+  subscriptionPrice Float?
+  wholesaleBasePrice Float?
+  image             String
+  overview          String   @db.Text
+  benefits          String[]
+  useCases          String[]
+  disclaimer        String   @db.Text
+  purity            Float?
+  storage           String?
+  description       String?  @db.Text
+  molecularWeight   String?
+  casNumber         String?
+  sequence          String?
+  researchApplications String[]
+  
+  stripeProductId   String?
+  oneTimePriceId    String?
+  subscriptionPriceId String?
+  
+  rating            Float    @default(0)
+  reviewCount       Int      @default(0)
+  featuredReview    String?  @db.Text
+  
+  isActive          Boolean  @default(true)
+  isWholesaleOnly   Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  orderItems        OrderItem[]
+  wholesalePricing  ProductWholesalePricing[]
+  
+  @@map("products")
+}
+
+model ProductWholesalePricing {
+  id                String   @id @default(cuid())
+  productId         String
+  wholesaleAccountId String
+  price             Float
+  subscriptionPrice Float?
+  
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  wholesaleAccount  WholesaleAccount @relation(fields: [wholesaleAccountId], references: [id], onDelete: Cascade)
+  
+  @@unique([productId, wholesaleAccountId])
+  @@map("product_wholesale_pricing")
+}
+
+model Order {
+  id                String   @id @default(cuid())
+  orderId           String   @unique
+  userId             String?
+  wholesaleAccountId String?
+  orderSource        String   @default("website")
+  paymentMethod      String
+  paymentStatus      String
+  orderStatus        OrderStatus @default(PENDING)
+  
+  customerEmail     String
+  customerName      String?
+  customerPhone     String?
+  
+  shippingLine1     String
+  shippingLine2     String?
+  shippingCity      String
+  shippingState     String
+  shippingPostalCode String
+  shippingCountry   String
+  
+  subtotal          Float
+  shipping          Float    @default(0)
+  tax               Float    @default(0)
+  total             Float
+  
+  specialInstructions String? @db.Text
+  
+  // ShipStation integration fields
+  trackingNumber    String?
+  carrier           String?
+  shippingService   String?
+  labelCreateDate   DateTime?
+  shipDate          DateTime?
+  shippingCost      Float?
+  
+  stripeSessionId    String?
+  stripePaymentIntentId String?
+  stripeSubscriptionId String?
+  
+  cryptocurrency    String?
+  transactionId      String?
+  walletAddress      String?
+  
+  referralId        String?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  user              User?    @relation(fields: [userId], references: [id])
+  wholesaleAccount  WholesaleAccount? @relation(fields: [wholesaleAccountId], references: [id])
+  items             OrderItem[]
+  
+  @@map("orders")
+}
+
+model OrderItem {
+  id                String   @id @default(cuid())
+  orderId           String
+  productId         String
+  name              String
+  quantity          Int
+  price             Float
+  subtotal          Float
+  purchaseType      String
+  
+  order             Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product           Product  @relation(fields: [productId], references: [id])
+  
+  @@map("order_items")
+}

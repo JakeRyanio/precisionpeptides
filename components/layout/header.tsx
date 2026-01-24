@@ -3,8 +3,15 @@
 import { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { ShoppingCart, Menu, X } from "lucide-react"
+import { ShoppingCart, Menu, X, Building2, Shield } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { useCart } from "@/components/cart/cart-context"
 import { CartDrawer } from "@/components/cart/cart-drawer"
 
@@ -50,8 +57,37 @@ export function Header() {
               </Link>
             </nav>
 
-            {/* Cart and Mobile Menu */}
-            <div className="flex items-center space-x-4">
+            {/* Cart, Portals, and Mobile Menu */}
+            <div className="flex items-center space-x-2">
+              {/* Portal Access Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="hidden md:flex text-[#a09a94] hover:text-[#ebe7e4] hover:bg-[#403c3a]"
+                  >
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Portals
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-[#201c1a] border-[#403c3a]">
+                  <DropdownMenuItem asChild>
+                    <Link href="/wholesale" className="flex items-center text-[#ebe7e4] cursor-pointer">
+                      <Building2 className="h-4 w-4 mr-2 text-[#d2c6b8]" />
+                      Wholesale Portal
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-[#403c3a]" />
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin" className="flex items-center text-[#ebe7e4] cursor-pointer">
+                      <Shield className="h-4 w-4 mr-2 text-[#d2c6b8]" />
+                      Owner Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -94,6 +130,17 @@ export function Header() {
                 <Link href="/faq" className="text-[#ebe7e4] hover:text-[#d2c6b8] transition-colors font-medium">
                   FAQ
                 </Link>
+                <div className="border-t border-[#403c3a] pt-4 mt-2">
+                  <p className="text-xs text-[#a09a94] mb-2 uppercase tracking-wider">Portals</p>
+                  <Link href="/wholesale" className="flex items-center text-[#ebe7e4] hover:text-[#d2c6b8] transition-colors font-medium py-2">
+                    <Building2 className="h-4 w-4 mr-2 text-[#d2c6b8]" />
+                    Wholesale Portal
+                  </Link>
+                  <Link href="/admin" className="flex items-center text-[#ebe7e4] hover:text-[#d2c6b8] transition-colors font-medium py-2">
+                    <Shield className="h-4 w-4 mr-2 text-[#d2c6b8]" />
+                    Owner Dashboard
+                  </Link>
+                </div>
               </div>
             </nav>
           )}
