@@ -12,7 +12,8 @@ import {
   X,
   LogOut,
   ChevronRight,
-  Building2
+  Building2,
+  Settings
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -22,6 +23,7 @@ const sidebarLinks = [
   { href: "/wholesale/pricing", label: "My Pricing", icon: DollarSign },
   { href: "/wholesale/orders", label: "Order History", icon: ShoppingCart },
   { href: "/wholesale/shop", label: "Place Order", icon: Package },
+  { href: "/wholesale/settings", label: "Account Settings", icon: Settings },
 ]
 
 export default function WholesaleLayout({ children }: { children: React.ReactNode }) {
