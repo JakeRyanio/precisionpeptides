@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, ShoppingCart, Users, DollarSign, TrendingUp, Clock } from "lucide-react"
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic'
+
 async function getDashboardStats() {
   try {
     const [

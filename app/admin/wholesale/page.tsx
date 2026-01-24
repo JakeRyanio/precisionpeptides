@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { WholesaleTable } from "./wholesale-table"
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic'
+
 async function getWholesaleAccounts() {
   try {
     const accounts = await prisma.wholesaleAccount.findMany({

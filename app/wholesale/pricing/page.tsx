@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { Package } from "lucide-react"
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic'
+
 const VIALS_PER_KIT = 10
 
 // Demo: In production, get the logged-in user's wholesale account ID

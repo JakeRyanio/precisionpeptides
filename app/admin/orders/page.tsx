@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { OrdersTable } from "./orders-table"
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic'
+
 async function getOrders() {
   try {
     const orders = await prisma.order.findMany({

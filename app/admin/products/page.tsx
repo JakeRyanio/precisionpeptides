@@ -1,6 +1,9 @@
 import { prisma } from "@/lib/prisma"
 import { ProductsTable } from "./products-table"
 
+// Force dynamic rendering - don't pre-render at build time
+export const dynamic = 'force-dynamic'
+
 async function getProducts() {
   try {
     const products = await prisma.product.findMany({
