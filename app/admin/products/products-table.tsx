@@ -54,6 +54,13 @@ type Product = {
   image: string
   isActive: boolean
   isWholesaleOnly: boolean
+  // New visibility fields
+  activeRetail: boolean
+  activeWholesale: boolean
+  // Inventory fields
+  sku: string | null
+  inventory: number
+  lowStockThreshold: number | null
   purity: number | null
   overview: string
   benefits: string[]
@@ -86,6 +93,11 @@ const emptyProduct: Omit<Product, 'id'> = {
   image: "/images/precision-peptides-vial.png",
   isActive: true,
   isWholesaleOnly: false,
+  activeRetail: true,
+  activeWholesale: true,
+  sku: null,
+  inventory: 0,
+  lowStockThreshold: null,
   purity: 99.0,
   overview: "High-quality research peptide for laboratory use only.",
   benefits: [],
@@ -139,6 +151,11 @@ export function ProductsTable({ products: initialProducts }: { products: Product
             image: editingProduct.image,
             isActive: editingProduct.isActive,
             isWholesaleOnly: editingProduct.isWholesaleOnly,
+            activeRetail: editingProduct.activeRetail,
+            activeWholesale: editingProduct.activeWholesale,
+            sku: editingProduct.sku,
+            inventory: editingProduct.inventory,
+            lowStockThreshold: editingProduct.lowStockThreshold,
             purity: editingProduct.purity,
             overview: editingProduct.overview,
             benefits: editingProduct.benefits,
@@ -173,6 +190,11 @@ export function ProductsTable({ products: initialProducts }: { products: Product
             image: editingProduct.image,
             isActive: editingProduct.isActive,
             isWholesaleOnly: editingProduct.isWholesaleOnly,
+            activeRetail: editingProduct.activeRetail,
+            activeWholesale: editingProduct.activeWholesale,
+            sku: editingProduct.sku,
+            inventory: editingProduct.inventory,
+            lowStockThreshold: editingProduct.lowStockThreshold,
             purity: editingProduct.purity,
             overview: editingProduct.overview,
             benefits: editingProduct.benefits,
@@ -250,10 +272,32 @@ export function ProductsTable({ products: initialProducts }: { products: Product
     }
   }
 
+  async function toggleProductField(product: Product, field: 'activeRetail' | 'activeWholesale') {
+    try {
+      const res = await fetch("/api/admin/products", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: product.id,
+          [field]: !product[field]
+        })
+      })
+
+      if (res.ok) {
+        setProducts(products.map(p => 
+          p.id === product.id ? { ...p, [field]: !p[field] } : p
+        ))
+        router.refresh()
+      }
+    } catch (error) {
+      console.error(`Failed to toggle ${field}:`, error)
+    }
+  }
+
   return (
     <>
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-5 gap-4 mb-6">
         <div className="bg-[#201c1a] rounded-lg border border-[#403c3a] p-4">
           <p className="text-[#a09a94] text-sm">Total Products</p>
           <p className="text-2xl font-bold text-[#ebe7e4]">{products.length}</p>
@@ -265,6 +309,18 @@ export function ProductsTable({ products: initialProducts }: { products: Product
         <div className="bg-[#201c1a] rounded-lg border border-[#403c3a] p-4">
           <p className="text-[#a09a94] text-sm">Inactive Products</p>
           <p className="text-2xl font-bold text-red-400">{products.filter(p => !p.isActive).length}</p>
+        </div>
+        <div className="bg-[#201c1a] rounded-lg border border-[#403c3a] p-4">
+          <p className="text-[#a09a94] text-sm">Low Stock</p>
+          <p className="text-2xl font-bold text-yellow-400">
+            {products.filter(p => p.lowStockThreshold && p.inventory <= p.lowStockThreshold && p.inventory > 0).length}
+          </p>
+        </div>
+        <div className="bg-[#201c1a] rounded-lg border border-[#403c3a] p-4">
+          <p className="text-[#a09a94] text-sm">Out of Stock</p>
+          <p className="text-2xl font-bold text-red-400">
+            {products.filter(p => p.inventory === 0).length}
+          </p>
         </div>
       </div>
 
@@ -306,17 +362,18 @@ export function ProductsTable({ products: initialProducts }: { products: Product
             <TableRow className="border-[#403c3a] hover:bg-transparent">
               <TableHead className="text-[#a09a94]">Product</TableHead>
               <TableHead className="text-[#a09a94]">Category</TableHead>
+              <TableHead className="text-[#a09a94]">SKU</TableHead>
+              <TableHead className="text-[#a09a94]">Inventory</TableHead>
+              <TableHead className="text-[#a09a94]">Price</TableHead>
               <TableHead className="text-[#a09a94]">Retail</TableHead>
               <TableHead className="text-[#a09a94]">Wholesale</TableHead>
-              <TableHead className="text-[#a09a94]">Visibility</TableHead>
-              <TableHead className="text-[#a09a94]">Active</TableHead>
               <TableHead className="text-[#a09a94] text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredProducts.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-12">
+                <TableCell colSpan={8} className="text-center py-12">
                   <Package className="h-12 w-12 mx-auto text-[#403c3a] mb-4" />
                   <p className="text-[#a09a94]">No products found</p>
                   <p className="text-[#5a5654] text-sm mt-1">Try adjusting your search or filter</p>
@@ -348,31 +405,42 @@ export function ProductsTable({ products: initialProducts }: { products: Product
                       {product.category}
                     </Badge>
                   </TableCell>
+                  <TableCell className="text-[#ebe7e4] font-mono text-sm">
+                    {product.sku || <span className="text-[#5a5654]">—</span>}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className={`font-medium ${
+                        product.inventory === 0 ? "text-red-400" :
+                        product.lowStockThreshold && product.inventory <= product.lowStockThreshold 
+                          ? "text-yellow-400" : "text-green-400"
+                      }`}>
+                        {product.inventory}
+                      </span>
+                      {product.inventory === 0 && (
+                        <Badge className="bg-red-500/20 text-red-300 text-xs">Out</Badge>
+                      )}
+                      {product.lowStockThreshold && product.inventory > 0 && 
+                       product.inventory <= product.lowStockThreshold && (
+                        <Badge className="bg-yellow-500/20 text-yellow-300 text-xs">Low</Badge>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="text-[#ebe7e4] font-medium">
                     ${product.price.toFixed(2)}
                   </TableCell>
-                  <TableCell className="text-[#ebe7e4]">
-                    {product.wholesaleBasePrice 
-                      ? <span className="text-green-400">${product.wholesaleBasePrice.toFixed(2)}</span>
-                      : <span className="text-[#a09a94]">—</span>
-                    }
-                  </TableCell>
                   <TableCell>
-                    {product.isWholesaleOnly ? (
-                      <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
-                        Wholesale Only
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
-                        Retail + Wholesale
-                      </Badge>
-                    )}
+                    <Switch
+                      checked={product.activeRetail}
+                      onCheckedChange={() => toggleProductField(product, 'activeRetail')}
+                      className="data-[state=checked]:bg-blue-500"
+                    />
                   </TableCell>
                   <TableCell>
                     <Switch
-                      checked={product.isActive}
-                      onCheckedChange={() => toggleProductActive(product)}
-                      className="data-[state=checked]:bg-green-500"
+                      checked={product.activeWholesale}
+                      onCheckedChange={() => toggleProductField(product, 'activeWholesale')}
+                      className="data-[state=checked]:bg-purple-500"
                     />
                   </TableCell>
                   <TableCell>
@@ -645,6 +713,97 @@ export function ProductsTable({ products: initialProducts }: { products: Product
                   })}
                   className="data-[state=checked]:bg-green-500"
                 />
+              </div>
+
+              {/* Visibility Controls */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-[#d2c6b8] border-b border-[#403c3a] pb-2">
+                  Channel Visibility
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-3 bg-[#1a1816] rounded-lg">
+                    <div>
+                      <Label htmlFor="activeRetail">Retail Active</Label>
+                      <p className="text-xs text-[#5a5654]">Show on retail shop</p>
+                    </div>
+                    <Switch
+                      id="activeRetail"
+                      checked={editingProduct.activeRetail}
+                      onCheckedChange={(checked) => setEditingProduct({
+                        ...editingProduct,
+                        activeRetail: checked
+                      })}
+                      className="data-[state=checked]:bg-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between p-3 bg-[#1a1816] rounded-lg">
+                    <div>
+                      <Label htmlFor="activeWholesale">Wholesale Active</Label>
+                      <p className="text-xs text-[#5a5654]">Show in wholesale catalog</p>
+                    </div>
+                    <Switch
+                      id="activeWholesale"
+                      checked={editingProduct.activeWholesale}
+                      onCheckedChange={(checked) => setEditingProduct({
+                        ...editingProduct,
+                        activeWholesale: checked
+                      })}
+                      className="data-[state=checked]:bg-purple-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Inventory Settings */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-medium text-[#d2c6b8] border-b border-[#403c3a] pb-2">
+                  Inventory Management
+                </h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="sku">SKU</Label>
+                    <Input
+                      id="sku"
+                      value={editingProduct.sku || ""}
+                      onChange={(e) => setEditingProduct({
+                        ...editingProduct,
+                        sku: e.target.value || null
+                      })}
+                      placeholder="PEPTIDE-001"
+                      className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4] font-mono"
+                    />
+                    <p className="text-xs text-[#5a5654]">Must match ShipStation SKU</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="inventory">Stock Quantity</Label>
+                    <Input
+                      id="inventory"
+                      type="number"
+                      min="0"
+                      value={editingProduct.inventory}
+                      onChange={(e) => setEditingProduct({
+                        ...editingProduct,
+                        inventory: parseInt(e.target.value) || 0
+                      })}
+                      className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lowStockThreshold">Low Stock Alert</Label>
+                    <Input
+                      id="lowStockThreshold"
+                      type="number"
+                      min="0"
+                      value={editingProduct.lowStockThreshold || ""}
+                      onChange={(e) => setEditingProduct({
+                        ...editingProduct,
+                        lowStockThreshold: e.target.value ? parseInt(e.target.value) : null
+                      })}
+                      placeholder="Optional"
+                      className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           )}

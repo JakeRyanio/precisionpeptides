@@ -5,8 +5,15 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog"
 import Image from "next/image"
-import { Package, Plus, Minus, ShoppingCart, Info } from "lucide-react"
+import { Package, Plus, Minus, ShoppingCart, Info, Mail } from "lucide-react"
 
 const VIALS_PER_KIT = 10
 
@@ -18,6 +25,8 @@ interface Product {
   image: string
   category: string
   purity: number | null
+  activeWholesale: boolean
+  inventory: number
 }
 
 interface CartItem {
@@ -30,6 +39,8 @@ export default function WholesaleShopPage() {
   const [loading, setLoading] = useState(true)
   const [cart, setCart] = useState<CartItem[]>([])
   const [kitQuantities, setKitQuantities] = useState<Record<string, number>>({})
+  const [requestDialogOpen, setRequestDialogOpen] = useState(false)
+  const [requestProduct, setRequestProduct] = useState<Product | null>(null)
 
   useEffect(() => {
     async function fetchProducts() {
@@ -158,7 +169,51 @@ export default function WholesaleShopPage() {
       {/* Products Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {products.map((product) => {
-          // Demo: Apply 20% discount for wholesale pricing
+          // Check if product is unavailable for wholesale
+          if (!product.activeWholesale) {
+            return (
+              <Card key={product.id} className="bg-[#201c1a] border-[#403c3a] overflow-hidden opacity-75">
+                <div className="relative aspect-square bg-[#1a1816]">
+                  <Image
+                    src={product.image}
+                    alt={product.name}
+                    fill
+                    className="object-cover grayscale"
+                  />
+                  <Badge className="absolute top-3 left-3 bg-gray-500/90 text-white">
+                    Currently Unavailable
+                  </Badge>
+                </div>
+                
+                <CardContent className="p-4">
+                  <Badge variant="outline" className="border-[#403c3a] text-[#a09a94] text-xs mb-2">
+                    {product.category}
+                  </Badge>
+                  
+                  <h3 className="font-medium text-[#a09a94] mb-1">{product.name}</h3>
+                  
+                  {product.purity && (
+                    <p className="text-sm text-[#5a5654] mb-3">{product.purity}% purity</p>
+                  )}
+                  
+                  <div className="pt-3 border-t border-[#403c3a]">
+                    <Button 
+                      className="w-full bg-[#403c3a] text-[#ebe7e4] hover:bg-[#504c4a]"
+                      onClick={() => {
+                        setRequestProduct(product)
+                        setRequestDialogOpen(true)
+                      }}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Request Product
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )
+          }
+
+          // Available product - show normal card
           const wholesalePricePerVial = product.price * 0.8
           const kitPrice = wholesalePricePerVial * VIALS_PER_KIT
           const retailKitPrice = product.price * VIALS_PER_KIT
@@ -276,6 +331,58 @@ export default function WholesaleShopPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Request Product Dialog */}
+      <Dialog open={requestDialogOpen} onOpenChange={setRequestDialogOpen}>
+        <DialogContent className="bg-[#201c1a] border-[#403c3a] text-[#ebe7e4]">
+          <DialogHeader>
+            <DialogTitle>Request Product</DialogTitle>
+            <DialogDescription className="text-[#a09a94]">
+              This product is currently unavailable for wholesale ordering.
+              Contact us to request availability.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {requestProduct && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 p-4 bg-[#1a1816] rounded-lg">
+                <div className="relative h-16 w-16 rounded-lg overflow-hidden">
+                  <Image
+                    src={requestProduct.image}
+                    alt={requestProduct.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div>
+                  <p className="font-medium text-[#ebe7e4]">{requestProduct.name}</p>
+                  <p className="text-sm text-[#a09a94]">{requestProduct.category}</p>
+                </div>
+              </div>
+              
+              <div className="space-y-3 p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <p className="font-medium text-blue-300">How to Request</p>
+                <ol className="text-sm text-blue-200/80 space-y-2 list-decimal list-inside">
+                  <li>Send an email to <span className="font-mono text-blue-300">precisionpep@proton.me</span></li>
+                  <li>Use subject line: <span className="font-mono text-blue-300">WHOLESALE REQUEST</span></li>
+                  <li>Include the product name: <span className="text-blue-300">{requestProduct.name}</span></li>
+                  <li>Include your wholesale account details and requested quantity</li>
+                </ol>
+              </div>
+              
+              <Button 
+                className="w-full bg-[#d2c6b8] text-[#201c1a] hover:bg-[#c4b8aa]"
+                onClick={() => {
+                  window.location.href = `mailto:precisionpep@proton.me?subject=WHOLESALE REQUEST&body=Product: ${encodeURIComponent(requestProduct.name)}%0A%0AAccount:%0AQuantity Needed:%0A%0AAdditional Notes:`
+                }}
+              >
+                <Mail className="h-4 w-4 mr-2" />
+                Open Email Client
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

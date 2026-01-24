@@ -6,8 +6,7 @@ export async function GET() {
   try {
     const products = await prisma.product.findMany({
       where: { 
-        isActive: true,
-        isWholesaleOnly: false  // Hide wholesale-only products from retail shop
+        activeRetail: true  // Use new activeRetail field for retail shop visibility
       },
       orderBy: { name: 'asc' }
     })

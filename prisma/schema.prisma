@@ -94,6 +94,22 @@ model Product {
   
   isActive          Boolean  @default(true)
   isWholesaleOnly   Boolean  @default(false)
+  
+  // Separate visibility controls
+  activeRetail      Boolean  @default(true)
+  activeWholesale   Boolean  @default(true)
+  
+  // Inventory management
+  sku               String?  @unique
+  inventory         Int      @default(0)
+  lowStockThreshold Int?
+  
+  // Featured product fields
+  featuredDescription String? @db.Text
+  featuredUseCases    String[]
+  isFeatured          Boolean @default(false)
+  featuredOrder       Int?
+  
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   

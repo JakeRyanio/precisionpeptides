@@ -46,6 +46,18 @@ export async function POST(request: Request) {
         featuredReview: data.featuredReview || null,
         isActive: data.isActive !== undefined ? data.isActive : true,
         isWholesaleOnly: data.isWholesaleOnly || false,
+        // New visibility controls
+        activeRetail: data.activeRetail !== undefined ? data.activeRetail : true,
+        activeWholesale: data.activeWholesale !== undefined ? data.activeWholesale : true,
+        // Inventory fields
+        sku: data.sku || null,
+        inventory: data.inventory || 0,
+        lowStockThreshold: data.lowStockThreshold || null,
+        // Featured product fields
+        featuredDescription: data.featuredDescription || null,
+        featuredUseCases: data.featuredUseCases || [],
+        isFeatured: data.isFeatured || false,
+        featuredOrder: data.featuredOrder || null,
       }
     })
 
@@ -79,12 +91,34 @@ export async function PATCH(request: Request) {
       'image', 'overview', 'benefits', 'useCases', 'disclaimer', 'purity',
       'storage', 'description', 'molecularWeight', 'casNumber',
       'sequence', 'researchApplications', 'rating', 'reviewCount',
-      'featuredReview', 'isActive', 'isWholesaleOnly'
+      'featuredReview', 'isActive', 'isWholesaleOnly',
+      // NEW: Separate visibility controls
+      'activeRetail', 'activeWholesale',
+      // NEW: Inventory fields
+      'sku', 'inventory', 'lowStockThreshold',
+      // NEW: Featured product fields
+      'featuredDescription', 'featuredUseCases', 'isFeatured', 'featuredOrder'
     ]
 
     for (const field of allowedFields) {
       if (data[field] !== undefined) {
         updateData[field] = data[field]
+      }
+    }
+
+    // Check SKU uniqueness if being changed
+    if (updateData.sku) {
+      const existingProduct = await prisma.product.findFirst({
+        where: { 
+          sku: updateData.sku as string,
+          NOT: { id: productId }
+        }
+      })
+      if (existingProduct) {
+        return NextResponse.json(
+          { error: "SKU already exists" },
+          { status: 400 }
+        )
       }
     }
 

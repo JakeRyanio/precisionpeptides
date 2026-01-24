@@ -373,6 +373,28 @@ export async function POST(request: NextRequest) {
     
     console.log(`[ShipStation] Order shipped: ${orderNumber}, Tracking: ${trackingNumber}`)
     
+    // Decrement inventory for order items
+    const orderWithItems = await prisma.order.findUnique({
+      where: { orderId: orderNumber },
+      include: { items: true }
+    })
+
+    if (orderWithItems?.items) {
+      for (const item of orderWithItems.items) {
+        // Find product by productId and decrement inventory
+        await prisma.product.updateMany({
+          where: { 
+            id: item.productId,
+            inventory: { gt: 0 }  // Prevent negative inventory
+          },
+          data: {
+            inventory: { decrement: item.quantity }
+          }
+        })
+      }
+      console.log(`[ShipStation] Decremented inventory for order ${orderNumber}`)
+    }
+    
     // Return success (2xx required)
     return new NextResponse('OK', { status: 200 })
   } catch (error) {

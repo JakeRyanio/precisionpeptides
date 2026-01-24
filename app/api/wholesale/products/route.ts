@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
-// Get all active products for wholesale shop (includes all products)
+// Get all active products for wholesale shop (includes all products with availability status)
 export async function GET() {
   try {
     const products = await prisma.product.findMany({
@@ -11,7 +11,7 @@ export async function GET() {
       orderBy: { name: 'asc' }
     })
     
-    // Transform to match the frontend Product type
+    // Transform to match the frontend Product type, including wholesale availability
     const transformedProducts = products.map(product => ({
       id: product.id,
       name: product.name,
@@ -30,6 +30,9 @@ export async function GET() {
       casNumber: product.casNumber,
       sequence: product.sequence,
       researchApplications: product.researchApplications,
+      // Include wholesale availability status
+      activeWholesale: product.activeWholesale,
+      inventory: product.inventory,
       reviews: {
         rating: product.rating,
         count: product.reviewCount,

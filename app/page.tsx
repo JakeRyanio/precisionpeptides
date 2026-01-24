@@ -1,4 +1,5 @@
 import { Hero } from "@/components/home/hero"
+import { HighInventoryProducts } from "@/components/home/high-inventory-products"
 import { FeaturedProducts } from "@/components/home/featured-products"
 import { FeaturedStack } from "@/components/home/featured-stack"
 import { Benefits } from "@/components/home/benefits"
@@ -45,6 +46,7 @@ export default function HomePage() {
       </header>
       
       <Hero />
+      <HighInventoryProducts />
       <FeaturedProducts />
       <FeaturedStack />
       <Benefits />
