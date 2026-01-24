@@ -296,7 +296,32 @@ export function ProductsTable({ products: initialProducts }: { products: Product
 
   return (
     <>
-      {/* Stats */}
+      {/* Inventory Value Stats */}
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="bg-gradient-to-br from-emerald-900/30 to-emerald-800/10 rounded-lg border border-emerald-500/30 p-4">
+          <p className="text-emerald-400/80 text-sm">Total Inventory Value (Retail)</p>
+          <p className="text-3xl font-bold text-emerald-400">
+            ${products.reduce((sum, p) => sum + (p.inventory * p.price), 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className="bg-[#201c1a] rounded-lg border border-[#403c3a] p-4">
+          <p className="text-[#a09a94] text-sm">Total Units in Stock</p>
+          <p className="text-3xl font-bold text-[#ebe7e4]">
+            {products.reduce((sum, p) => sum + p.inventory, 0).toLocaleString()}
+          </p>
+        </div>
+        <div className="bg-[#201c1a] rounded-lg border border-[#403c3a] p-4">
+          <p className="text-[#a09a94] text-sm">Average Unit Value</p>
+          <p className="text-3xl font-bold text-[#d2c6b8]">
+            ${(products.reduce((sum, p) => sum + p.inventory, 0) > 0 
+              ? (products.reduce((sum, p) => sum + (p.inventory * p.price), 0) / products.reduce((sum, p) => sum + p.inventory, 0))
+              : 0
+            ).toFixed(2)}
+          </p>
+        </div>
+      </div>
+
+      {/* Product Stats */}
       <div className="grid grid-cols-5 gap-4 mb-6">
         <div className="bg-[#201c1a] rounded-lg border border-[#403c3a] p-4">
           <p className="text-[#a09a94] text-sm">Total Products</p>
