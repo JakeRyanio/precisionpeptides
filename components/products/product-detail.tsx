@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Star, Shield, Beaker, Clock } from "lucide-react"
+import { Star, Shield, Clock } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { QuickPurchaseOptions } from "./quick-purchase-options"
 import type { Product } from "@/lib/products-data"
@@ -78,18 +78,12 @@ export function ProductDetail({ product }: ProductDetailProps) {
           </div>
 
           {/* Trust Badges */}
-          <div className="grid grid-cols-3 gap-4 py-6 border-t border-[#403c3a]">
+          <div className="grid grid-cols-2 gap-4 py-6 border-t border-[#403c3a]">
             <div className="text-center">
               <div className="w-12 h-12 bg-[#403c3a] rounded-full flex items-center justify-center mx-auto mb-2">
                 <Shield className="h-6 w-6 text-[#d2c6b8]" />
               </div>
               <p className="text-sm text-[#beb2a4]">Lab Tested</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-[#403c3a] rounded-full flex items-center justify-center mx-auto mb-2">
-                <Beaker className="h-6 w-6 text-[#d2c6b8]" />
-              </div>
-              <p className="text-sm text-[#beb2a4]">COA Included</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-[#403c3a] rounded-full flex items-center justify-center mx-auto mb-2">
