@@ -42,14 +42,13 @@ export async function POST(request: Request) {
       password, 
       name, 
       companyName, 
-      taxId, 
       status = "APPROVED",
       discountPercent 
     } = body
 
-    if (!email || !companyName) {
+    if (!email) {
       return NextResponse.json(
-        { error: "Email and company name are required" },
+        { error: "Email is required" },
         { status: 400 }
       )
     }
@@ -95,8 +94,7 @@ export async function POST(request: Request) {
       const wholesaleAccount = await tx.wholesaleAccount.create({
         data: {
           userId: user.id,
-          companyName,
-          taxId,
+          companyName: companyName || email,
           status,
           discountPercent
         },
@@ -127,7 +125,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json()
-    const { accountId, status, companyName, taxId, discountPercent, name, email, password } = body
+    const { accountId, status, companyName, discountPercent, name, email, password } = body
 
     if (!accountId) {
       return NextResponse.json(
@@ -140,7 +138,6 @@ export async function PATCH(request: Request) {
     const wholesaleData: Record<string, unknown> = {}
     if (status !== undefined) wholesaleData.status = status
     if (companyName !== undefined) wholesaleData.companyName = companyName
-    if (taxId !== undefined) wholesaleData.taxId = taxId
     if (discountPercent !== undefined) wholesaleData.discountPercent = discountPercent
 
     // Update wholesale account

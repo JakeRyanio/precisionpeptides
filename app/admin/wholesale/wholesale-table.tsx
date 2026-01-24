@@ -94,7 +94,6 @@ type NewAccountForm = {
   password: string
   name: string
   companyName: string
-  taxId: string
   status: string
   discountPercent: string
 }
@@ -104,7 +103,6 @@ const initialFormState: NewAccountForm = {
   password: "",
   name: "",
   companyName: "",
-  taxId: "",
   status: "APPROVED",
   discountPercent: "20"
 }
@@ -170,7 +168,6 @@ export function WholesaleTable({
       password: "",
       name: account.user.name || "",
       companyName: account.companyName,
-      taxId: account.taxId || "",
       status: account.status,
       discountPercent: account.discountPercent?.toString() || ""
     })
@@ -209,8 +206,7 @@ export function WholesaleTable({
           email: formData.email,
           password: formData.password || undefined,
           name: formData.name || undefined,
-          companyName: formData.companyName,
-          taxId: formData.taxId || undefined,
+          companyName: formData.companyName || undefined,
           status: formData.status,
           discountPercent: formData.discountPercent ? parseFloat(formData.discountPercent) : undefined
         })
@@ -251,8 +247,7 @@ export function WholesaleTable({
           email: formData.email,
           password: formData.password || undefined,
           name: formData.name || undefined,
-          companyName: formData.companyName,
-          taxId: formData.taxId || undefined,
+          companyName: formData.companyName || undefined,
           status: formData.status,
           discountPercent: formData.discountPercent ? parseFloat(formData.discountPercent) : null
         })
@@ -270,8 +265,7 @@ export function WholesaleTable({
         a.id === editingAccount.id 
           ? { 
               ...a, 
-              companyName: formData.companyName,
-              taxId: formData.taxId || null,
+              companyName: formData.companyName || a.companyName,
               status: formData.status,
               discountPercent: formData.discountPercent ? parseFloat(formData.discountPercent) : null,
               user: {
@@ -438,30 +432,18 @@ export function WholesaleTable({
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="companyName">Company Name *</Label>
+          <Label htmlFor="companyName">Company Name</Label>
           <Input
             id="companyName"
             value={formData.companyName}
             onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-            placeholder="ABC Research Labs"
+            placeholder="ABC Research Labs (optional)"
             className="bg-[#1a1816] border-[#403c3a]"
-            required
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="taxId">Tax ID / EIN</Label>
-          <Input
-            id="taxId"
-            value={formData.taxId}
-            onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
-            placeholder="XX-XXXXXXX"
-            className="bg-[#1a1816] border-[#403c3a]"
-          />
-        </div>
-        
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="status">Account Status</Label>
           <Select 
@@ -607,10 +589,7 @@ export function WholesaleTable({
                         <Building2 className="h-5 w-5 text-[#d2c6b8]" />
                       </div>
                       <div>
-                        <p className="font-medium text-[#ebe7e4]">{account.companyName}</p>
-                        {account.taxId && (
-                          <p className="text-sm text-[#a09a94]">Tax ID: {account.taxId}</p>
-                        )}
+                        <p className="font-medium text-[#ebe7e4]">{account.companyName || account.user.email}</p>
                       </div>
                     </div>
                   </TableCell>
@@ -703,7 +682,7 @@ export function WholesaleTable({
             </Button>
             <Button
               onClick={createAccount}
-              disabled={saving || !formData.email || !formData.companyName}
+              disabled={saving || !formData.email}
               className="bg-[#d2c6b8] text-[#201c1a] hover:bg-[#c4b8aa]"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -741,7 +720,7 @@ export function WholesaleTable({
             </Button>
             <Button
               onClick={updateAccount}
-              disabled={saving || !formData.email || !formData.companyName}
+              disabled={saving || !formData.email}
               className="bg-[#d2c6b8] text-[#201c1a] hover:bg-[#c4b8aa]"
             >
               <Save className="h-4 w-4 mr-2" />
