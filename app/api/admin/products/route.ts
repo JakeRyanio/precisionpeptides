@@ -1,6 +1,82 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 
+const SHIPSTATION_API_BASE = 'https://ssapi.shipstation.com'
+
+// Helper to call ShipStation API
+async function shipstationRequest(
+  endpoint: string, 
+  method: 'GET' | 'POST' = 'GET',
+  body?: object
+): Promise<Response | null> {
+  const apiKey = process.env.SHIPSTATION_API_KEY
+  const apiSecret = process.env.SHIPSTATION_API_SECRET
+  
+  if (!apiKey || !apiSecret) {
+    return null
+  }
+
+  const auth = Buffer.from(`${apiKey}:${apiSecret}`).toString('base64')
+
+  return fetch(`${SHIPSTATION_API_BASE}${endpoint}`, {
+    method,
+    headers: {
+      'Authorization': `Basic ${auth}`,
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+}
+
+// Sync product to ShipStation (create if doesn't exist)
+async function syncProductToShipStation(product: {
+  sku: string
+  name: string
+  price: number
+}): Promise<{ status: string; productId?: number }> {
+  try {
+    // Check if product exists
+    const searchRes = await shipstationRequest(`/products?sku=${encodeURIComponent(product.sku)}`)
+    if (!searchRes) {
+      return { status: 'not_configured' }
+    }
+
+    if (searchRes.ok) {
+      const data = await searchRes.json()
+      const existing = data.products?.find((p: { sku: string }) => p.sku === product.sku)
+      
+      if (existing) {
+        console.log(`[ShipStation] Product exists: ${product.sku} (ID: ${existing.productId})`)
+        return { status: 'exists', productId: existing.productId }
+      }
+    }
+
+    // Create product in ShipStation
+    const createRes = await shipstationRequest('/products', 'POST', {
+      sku: product.sku,
+      name: product.name,
+      price: product.price,
+      defaultCost: product.price * 0.5,
+      weight: 2,
+      weightUnits: 'ounces',
+      active: true,
+      fulfillmentSku: product.sku,
+    })
+
+    if (createRes && createRes.ok) {
+      const created = await createRes.json()
+      console.log(`[ShipStation] Created product: ${product.sku} (ID: ${created.productId})`)
+      return { status: 'created', productId: created.productId }
+    }
+
+    console.error('[ShipStation] Failed to create product')
+    return { status: 'failed' }
+  } catch (error) {
+    console.error('[ShipStation] Sync error:', error)
+    return { status: 'error' }
+  }
+}
+
 // Get all products
 export async function GET() {
   try {
@@ -61,7 +137,21 @@ export async function POST(request: Request) {
       }
     })
 
-    return NextResponse.json({ success: true, product })
+    // Sync to ShipStation if product has SKU
+    let shipstationSync = null
+    if (product.sku) {
+      shipstationSync = await syncProductToShipStation({
+        sku: product.sku,
+        name: product.name,
+        price: product.price
+      })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      product,
+      shipstation: shipstationSync
+    })
   } catch (error) {
     console.error("Failed to create product:", error)
     return NextResponse.json(
@@ -127,7 +217,21 @@ export async function PATCH(request: Request) {
       data: updateData
     })
 
-    return NextResponse.json({ success: true, product })
+    // Sync to ShipStation if product has SKU and SKU or inventory was updated
+    let shipstationSync = null
+    if (product.sku && (updateData.sku !== undefined || updateData.inventory !== undefined)) {
+      shipstationSync = await syncProductToShipStation({
+        sku: product.sku,
+        name: product.name,
+        price: product.price
+      })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      product,
+      shipstation: shipstationSync
+    })
   } catch (error) {
     console.error("Failed to update product:", error)
     return NextResponse.json(
