@@ -35,6 +35,12 @@ export function Hero() {
               PEPTIDES
             </h1>
 
+            {/* Purity Badge */}
+            <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-400/40 rounded-full px-4 py-2 mb-4">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+              <span className="text-emerald-300 font-medium text-sm tracking-wide">ALL PRODUCTS 99%+ PURITY GUARANTEED</span>
+            </div>
+
             {/* Subtitle */}
             <p className="text-xl md:text-2xl text-[#d2c6b8] mb-8 max-w-2xl font-light">
               Premium research peptides crafted for scientific excellence.
@@ -80,9 +86,9 @@ export function Hero() {
             <div className="w-16 h-16 bg-emerald-200/30 rounded-full flex items-center justify-center mb-6">
               <Beaker className="h-8 w-8 text-emerald-300" />
             </div>
-            <h3 className="text-xl font-medium mb-3 text-[#ebe7e4]">Lab-Grade Purity</h3>
+            <h3 className="text-xl font-medium mb-3 text-[#ebe7e4]">HPLC Lab Tested</h3>
             <p className="text-[#beb2a4] text-center leading-relaxed">
-              99%+ purity guaranteed through rigorous testing protocols
+              Every batch verified through rigorous HPLC testing protocols
             </p>
           </div>
 

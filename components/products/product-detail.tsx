@@ -89,7 +89,7 @@ export function ProductDetail({ product }: ProductDetailProps) {
               <div className="w-12 h-12 bg-[#403c3a] rounded-full flex items-center justify-center mx-auto mb-2">
                 <Beaker className="h-6 w-6 text-[#d2c6b8]" />
               </div>
-              <p className="text-sm text-[#beb2a4]">99%+ Purity</p>
+              <p className="text-sm text-[#beb2a4]">USA Made</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 bg-[#403c3a] rounded-full flex items-center justify-center mx-auto mb-2">
