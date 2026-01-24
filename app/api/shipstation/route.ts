@@ -104,6 +104,9 @@ interface OrderWithItems {
     name: string
     quantity: number
     price: number
+    product: {
+      sku: string | null
+    } | null
   }[]
 }
 
@@ -168,9 +171,12 @@ function generateOrdersXML(orders: OrderWithItems[], totalPages: number): string
     // Items
     const itemsEl = orderEl.ele('Items')
     for (const item of order.items) {
+      // Use actual SKU from product if available, otherwise generate from name
+      const sku = item.product?.sku || generateSKU(item.productId, item.name)
+      
       const itemEl = itemsEl.ele('Item')
       itemEl.ele('LineItemID').dat(item.id).up()
-      itemEl.ele('SKU').dat(generateSKU(item.productId, item.name)).up()
+      itemEl.ele('SKU').dat(sku).up()
       itemEl.ele('Name').dat(item.name).up()
       itemEl.ele('ImageUrl').dat('').up()
       itemEl.ele('Weight').txt('2').up() // Default weight in ounces
@@ -245,7 +251,13 @@ export async function GET(request: NextRequest) {
             },
           },
           include: {
-            items: true,
+            items: {
+              include: {
+                product: {
+                  select: { sku: true }
+                }
+              }
+            },
           },
           orderBy: { updatedAt: 'asc' },
           skip: offset,
