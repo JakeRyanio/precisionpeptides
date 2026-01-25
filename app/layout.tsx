@@ -6,6 +6,7 @@ import { CartProvider } from "@/components/cart/cart-context"
 import { Header } from "@/components/layout/header"
 import { Footer } from "@/components/layout/footer"
 import { CartPopupWrapper } from "@/components/cart/cart-popup-wrapper"
+import { Providers } from "@/components/providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -105,14 +106,16 @@ export default function RootLayout({
         />
       </head>
       <body className={`${inter.className} bg-[#201c1a] text-[#ebe7e4] min-h-screen`}>
-        <CartProvider>
-          <div className="flex flex-col min-h-screen">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-          <CartPopupWrapper />
-        </CartProvider>
+        <Providers>
+          <CartProvider>
+            <div className="flex flex-col min-h-screen">
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+            <CartPopupWrapper />
+          </CartProvider>
+        </Providers>
         {/* PromoteKit Affiliate Tracking Script */}
         <script 
           async 

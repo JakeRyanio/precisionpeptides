@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { signOut, useSession } from "next-auth/react"
 import { 
   LayoutDashboard, 
   Package, 
@@ -13,7 +14,8 @@ import {
   LogOut,
   ChevronRight,
   Building2,
-  Settings
+  Settings,
+  User
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -29,6 +31,12 @@ const sidebarLinks = [
 export default function WholesaleLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
+  const { data: session } = useSession()
+
+  // Don't show layout for login, apply, and pending pages
+  if (pathname === "/wholesale/login" || pathname === "/wholesale/apply" || pathname === "/wholesale/pending") {
+    return <>{children}</>
+  }
 
   return (
     <div className="min-h-screen bg-[#1a1816]">
@@ -113,15 +121,27 @@ export default function WholesaleLayout({ children }: { children: React.ReactNod
             })}
           </nav>
 
-          {/* Footer */}
-          <div className="p-4 border-t border-[#403c3a]">
-            <Link
-              href="/"
-              className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#a09a94] hover:bg-[#403c3a]/50 hover:text-[#ebe7e4] transition-colors"
+          {/* User Info & Logout */}
+          <div className="p-4 border-t border-[#403c3a] space-y-2">
+            {session?.user && (
+              <div className="px-4 py-2 text-sm">
+                <div className="flex items-center gap-2 text-[#d2c6b8] mb-1">
+                  <Building2 className="h-4 w-4" />
+                  <span className="truncate font-medium">{session.user.companyName || "Wholesale"}</span>
+                </div>
+                <div className="flex items-center gap-2 text-[#a09a94]">
+                  <User className="h-4 w-4" />
+                  <span className="truncate text-xs">{session.user.email}</span>
+                </div>
+              </div>
+            )}
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="flex items-center gap-3 px-4 py-3 rounded-lg text-[#a09a94] hover:bg-[#403c3a]/50 hover:text-[#ebe7e4] transition-colors w-full"
             >
               <LogOut className="h-5 w-5" />
-              <span className="font-medium">Back to Store</span>
-            </Link>
+              <span className="font-medium">Sign Out</span>
+            </button>
           </div>
         </div>
       </aside>

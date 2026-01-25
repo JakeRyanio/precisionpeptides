@@ -17,22 +17,72 @@ import {
   ArrowLeft,
   Percent,
   Package,
-  Clock
+  Clock,
+  Lock,
+  AlertCircle
 } from "lucide-react"
 
 export default function WholesaleApplyPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState("")
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setIsSubmitting(true)
+    setError("")
     
-    // Simulate form submission - in production, this would call an API
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const formData = new FormData(e.currentTarget)
     
-    setIsSubmitting(false)
-    setIsSubmitted(true)
+    const data = {
+      companyName: formData.get("companyName"),
+      contactName: formData.get("contactName"),
+      email: formData.get("email"),
+      password: formData.get("password"),
+      phone: formData.get("phone"),
+      website: formData.get("website"),
+      businessType: formData.get("businessType"),
+      expectedVolume: formData.get("expectedVolume"),
+      additionalInfo: formData.get("additionalInfo")
+    }
+
+    // Validate password
+    const password = data.password as string
+    const confirmPassword = formData.get("confirmPassword") as string
+    
+    if (password !== confirmPassword) {
+      setError("Passwords do not match")
+      setIsSubmitting(false)
+      return
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters")
+      setIsSubmitting(false)
+      return
+    }
+
+    try {
+      const response = await fetch("/api/wholesale/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        setError(result.error || "Failed to submit application")
+        setIsSubmitting(false)
+        return
+      }
+
+      setIsSubmitting(false)
+      setIsSubmitted(true)
+    } catch (err) {
+      setError("An error occurred. Please try again.")
+      setIsSubmitting(false)
+    }
   }
 
   if (isSubmitted) {
@@ -120,6 +170,13 @@ export default function WholesaleApplyPage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2 text-red-400">
+                    <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
                 {/* Company Information */}
                 <div className="space-y-4">
                   <h3 className="text-lg font-medium text-[#ebe7e4] flex items-center gap-2">
@@ -131,6 +188,7 @@ export default function WholesaleApplyPage() {
                     <Label htmlFor="companyName" className="text-[#ebe7e4]">Company Name *</Label>
                     <Input
                       id="companyName"
+                      name="companyName"
                       required
                       placeholder="Your company name"
                       className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
@@ -141,6 +199,7 @@ export default function WholesaleApplyPage() {
                     <Label htmlFor="website" className="text-[#ebe7e4]">Website</Label>
                     <Input
                       id="website"
+                      name="website"
                       type="url"
                       placeholder="https://yourcompany.com"
                       className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
@@ -160,6 +219,7 @@ export default function WholesaleApplyPage() {
                       <Label htmlFor="contactName" className="text-[#ebe7e4]">Contact Name *</Label>
                       <Input
                         id="contactName"
+                        name="contactName"
                         required
                         placeholder="Full name"
                         className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
@@ -169,6 +229,7 @@ export default function WholesaleApplyPage() {
                       <Label htmlFor="contactTitle" className="text-[#ebe7e4]">Title / Position</Label>
                       <Input
                         id="contactTitle"
+                        name="contactTitle"
                         placeholder="e.g. Purchasing Manager"
                         className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
                       />
@@ -182,6 +243,7 @@ export default function WholesaleApplyPage() {
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#a09a94]" />
                         <Input
                           id="email"
+                          name="email"
                           type="email"
                           required
                           placeholder="you@company.com"
@@ -195,9 +257,54 @@ export default function WholesaleApplyPage() {
                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#a09a94]" />
                         <Input
                           id="phone"
+                          name="phone"
                           type="tel"
                           required
                           placeholder="(555) 123-4567"
+                          className="pl-10 bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Account Credentials */}
+                <div className="space-y-4 pt-4 border-t border-[#403c3a]">
+                  <h3 className="text-lg font-medium text-[#ebe7e4] flex items-center gap-2">
+                    <Lock className="h-5 w-5 text-[#d2c6b8]" />
+                    Create Account Password
+                  </h3>
+                  <p className="text-sm text-[#a09a94]">
+                    Create a password for your wholesale portal login. You'll use this to access your account once approved.
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="password" className="text-[#ebe7e4]">Password *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#a09a94]" />
+                        <Input
+                          id="password"
+                          name="password"
+                          type="password"
+                          required
+                          minLength={8}
+                          placeholder="Min. 8 characters"
+                          className="pl-10 bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword" className="text-[#ebe7e4]">Confirm Password *</Label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#a09a94]" />
+                        <Input
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          type="password"
+                          required
+                          minLength={8}
+                          placeholder="Confirm password"
                           className="pl-10 bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
                         />
                       </div>
@@ -216,6 +323,7 @@ export default function WholesaleApplyPage() {
                     <Label htmlFor="businessType" className="text-[#ebe7e4]">Type of Business *</Label>
                     <Input
                       id="businessType"
+                      name="businessType"
                       required
                       placeholder="e.g. Research Lab, Clinic, Distributor"
                       className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
@@ -226,6 +334,7 @@ export default function WholesaleApplyPage() {
                     <Label htmlFor="expectedVolume" className="text-[#ebe7e4]">Expected Monthly Order Volume *</Label>
                     <Input
                       id="expectedVolume"
+                      name="expectedVolume"
                       required
                       placeholder="e.g. $5,000 - $10,000"
                       className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4]"
@@ -236,6 +345,7 @@ export default function WholesaleApplyPage() {
                     <Label htmlFor="additionalInfo" className="text-[#ebe7e4]">Additional Information</Label>
                     <Textarea
                       id="additionalInfo"
+                      name="additionalInfo"
                       placeholder="Tell us more about your business and how you plan to use our products..."
                       rows={4}
                       className="bg-[#1a1816] border-[#403c3a] text-[#ebe7e4] resize-none"
