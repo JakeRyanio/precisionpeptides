@@ -58,16 +58,6 @@ export function ProductDetail({ product }: ProductDetailProps) {
             {/* Price Display */}
             <div className="mb-6">
               <div className="text-4xl font-medium text-[#d2c6b8] mb-2">${product.price.toFixed(2)}</div>
-              {product.subscriptionPrice && (
-                <div className="text-lg text-emerald-400">
-                  Or ${product.subscriptionPrice.toFixed(2)}/month with subscription (Save 15%)
-                </div>
-              )}
-              {!product.subscriptionPrice && (
-                <div className="text-lg text-[#beb2a4]">
-                  One-time purchase only • No subscription available
-                </div>
-              )}
             </div>
           </div>
 

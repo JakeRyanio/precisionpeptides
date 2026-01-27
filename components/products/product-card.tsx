@@ -14,16 +14,13 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const { addItem } = useCart()
 
-  const handleAddToCart = (purchaseType: "one-time" | "subscription" = "one-time") => {
-    const price = purchaseType === "subscription" ? (product.subscriptionPrice || 0) : product.price
-    const name = purchaseType === "subscription" ? `${product.name} (Monthly)` : product.name
-
+  const handleAddToCart = () => {
     addItem({
       id: product.id,
-      name: name,
-      price: price,
+      name: product.name,
+      price: product.price,
       image: product.image,
-      purchaseType: purchaseType,
+      purchaseType: "one-time",
     })
   }
 
@@ -72,37 +69,16 @@ export function ProductCard({ product }: ProductCardProps) {
           <div className="flex items-center justify-between">
             <div>
               <span className="text-2xl font-medium text-[#d2c6b8]">${product.price.toFixed(2)}</span>
-              {product.subscriptionPrice && (
-                <div className="text-sm text-emerald-400">
-                  ${product.subscriptionPrice.toFixed(2)}/mo with subscription
-                </div>
-              )}
-              {!product.subscriptionPrice && (
-                <div className="text-sm text-[#beb2a4]">
-                  One-time purchase only
-                </div>
-              )}
             </div>
           </div>
 
-          <div className="flex space-x-2">
-            <Button
-              onClick={() => handleAddToCart("one-time")}
-              className={`${product.subscriptionPrice ? 'flex-1' : 'w-full'} bg-[#d2c6b8] hover:bg-[#beb2a4] text-[#201c1a] font-medium rounded-md px-4 py-2 text-sm`}
-            >
-              <ShoppingCart className="h-4 w-4 mr-1" />
-              {product.subscriptionPrice ? 'Buy Once' : 'Add to Cart'}
-            </Button>
-
-            {product.subscriptionPrice && (
-              <Button
-                onClick={() => handleAddToCart("subscription")}
-                className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white font-medium rounded-md px-4 py-2 text-sm"
-              >
-                Subscribe & Save
-              </Button>
-            )}
-          </div>
+          <Button
+            onClick={handleAddToCart}
+            className="w-full bg-[#d2c6b8] hover:bg-[#beb2a4] text-[#201c1a] font-medium rounded-md px-4 py-2 text-sm"
+          >
+            <ShoppingCart className="h-4 w-4 mr-1" />
+            Add to Cart
+          </Button>
         </div>
       </div>
     </div>

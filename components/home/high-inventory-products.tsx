@@ -149,11 +149,6 @@ export function HighInventoryProducts() {
                     <span className="text-xl font-bold text-[#d2c6b8]">
                       ${product.price.toFixed(2)}
                     </span>
-                    {product.subscriptionPrice && (
-                      <span className="text-sm text-emerald-400 ml-2">
-                        ${product.subscriptionPrice.toFixed(2)}/mo
-                      </span>
-                    )}
                   </div>
                   <Button 
                     size="sm" 
