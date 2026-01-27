@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Star, ShoppingCart, Sparkles } from "lucide-react"
+import { useCart } from "@/components/cart/cart-context"
 
 interface FeaturedProduct {
   id: string
@@ -28,6 +29,17 @@ interface FeaturedProduct {
 export function HighInventoryProducts() {
   const [products, setProducts] = useState<FeaturedProduct[]>([])
   const [loading, setLoading] = useState(true)
+  const { addItem } = useCart()
+
+  const handleAddToCart = (product: FeaturedProduct) => {
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image,
+      purchaseType: "one-time",
+    })
+  }
 
   useEffect(() => {
     async function fetchFeaturedProducts() {
@@ -143,12 +155,14 @@ export function HighInventoryProducts() {
                       </span>
                     )}
                   </div>
-                  <Link href={`/products/${product.id}`}>
-                    <Button size="sm" className="bg-[#d2c6b8] text-[#201c1a] hover:bg-[#c4b8aa]">
-                      <ShoppingCart className="h-4 w-4 mr-1" />
-                      Shop
-                    </Button>
-                  </Link>
+                  <Button 
+                    size="sm" 
+                    className="bg-[#d2c6b8] text-[#201c1a] hover:bg-[#c4b8aa]"
+                    onClick={() => handleAddToCart(product)}
+                  >
+                    <ShoppingCart className="h-4 w-4 mr-1" />
+                    Add to Cart
+                  </Button>
                 </div>
               </CardContent>
             </Card>
